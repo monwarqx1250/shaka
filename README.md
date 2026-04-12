@@ -39,24 +39,24 @@ This is project-level configuration (based on the current directory). It has hig
 
 - `bash` example:
 
-  ```bash
+  ```sh
   eval "$(shaka bash)"
   ```
 
 - `fish` example:
 
-  ```fish
+  ```sh
   shaka fish | source
   ```
 
 - `pwsh` (PowerShell) example:
 
-  ```pwsh
+  ```sh
   Invoke-Expression (& shaka pwsh | Out-String)
   ```
 
 - `zsh` example:
-  ```zsh
+  ```sh
   eval "$(shaka zsh)"
   ```
 
@@ -64,7 +64,7 @@ This is project-level configuration (based on the current directory). It has hig
 
 By default, `shaka pwsh` omits built-in aliases to avoid conflicts. If you want to include them, use:
 
-```pwsh
+```sh
 Invoke-Expression (& shaka pwsh-conflict | Out-String)
 ```
 
@@ -81,7 +81,7 @@ In `pwsh` output mode, `shaka` expands environment variables in command values b
 
   can render to:
 
-  ```pwsh
+  ```sh
   function ocd { C:\Users\Sayad/scoop/apps/opencode-desktop/current/OpenCode @args }
   ```
 
@@ -95,20 +95,20 @@ In `pwsh` output mode, `shaka` expands environment variables in command values b
 - For example, the previous configuration example will create an alias `dc` that runs `docker compose`.
   - `bash`, `fish`, and `zsh`
 
-    ```bash
+    ```sh
     alias dc='docker compose'
     ```
 
   - `pwsh` (PowerShell)
 
-    ```pwsh
+    ```sh
     Remove-Alias -Name dc -Force -ErrorAction SilentlyContinue
     function dc { docker compose @args }
     ```
 
   - `pwsh` (PowerShell) with built-in aliases included
 
-    ```pwsh
+    ```sh
     function dc { docker compose @args }
     ```
 
@@ -118,18 +118,18 @@ In `pwsh` output mode, `shaka` expands environment variables in command values b
 
 Build and run locally:
 
-```bash
+```sh
 cargo run -- pwsh
 ```
 
 Install from the current source checkout:
 
-```bash
+```sh
 cargo install --path .
 ```
 
 If `shaka` is published on crates.io, install it as a package:
 
-```bash
+```sh
 cargo install shaka
 ```
