@@ -58,7 +58,10 @@ mod tests {
 
         let home = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE"));
         let expected_command = match home {
-            Ok(value) => format!("{value}/scoop/apps/opencode-desktop/current/OpenCode"),
+            Ok(value) => format!(
+                "{}/scoop/apps/opencode-desktop/current/OpenCode",
+                value.replace('\\', "/")
+            ),
             Err(_) => "$HOME/scoop/apps/opencode-desktop/current/OpenCode".to_string(),
         };
 

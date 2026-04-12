@@ -11,17 +11,6 @@ pub fn expand_pwsh_env_vars(input: &str) -> String {
         }
 
         let mut j = i + 1;
-        let mut env_prefix = false;
-
-        if j + 3 < chars.len()
-            && chars[j].eq_ignore_ascii_case(&'e')
-            && chars[j + 1].eq_ignore_ascii_case(&'n')
-            && chars[j + 2].eq_ignore_ascii_case(&'v')
-            && chars[j + 3] == ':'
-        {
-            env_prefix = true;
-            j += 4;
-        }
 
         let start = j;
         while j < chars.len() && (chars[j].is_ascii_alphanumeric() || chars[j] == '_') {
@@ -36,12 +25,9 @@ pub fn expand_pwsh_env_vars(input: &str) -> String {
 
         let name: String = chars[start..j].iter().collect();
         if let Ok(value) = std::env::var(&name) {
-            out.push_str(&value);
+            out.push_str(&value.replace('\\', "/"));
         } else {
             out.push('$');
-            if env_prefix {
-                out.push_str("env:");
-            }
             out.push_str(&name);
         }
 
@@ -80,6 +66,7 @@ mod tests {
     #[test]
     fn expands_dollar_var() {
         let (name, value) = known_var();
+        let value = value.replace('\\', "/");
         assert_eq!(
             expand_pwsh_env_vars(&format!("${name}/bin")),
             format!("{value}/bin")
@@ -87,26 +74,10 @@ mod tests {
     }
 
     #[test]
-    fn expands_dollar_env_var() {
-        let (name, value) = known_var();
-        assert_eq!(
-            expand_pwsh_env_vars(&format!("$env:{name}/bin")),
-            format!("{value}/bin")
-        );
-    }
-
-    #[test]
-    fn expands_case_insensitive_env_prefix() {
-        let (name, value) = known_var();
-        assert_eq!(
-            expand_pwsh_env_vars(&format!("$EnV:{name}/bin")),
-            format!("{value}/bin")
-        );
-    }
-
-    #[test]
     fn expands_multiple_vars_in_one_string() {
         let ((a_name, a_value), (b_name, b_value)) = known_var_two();
+        let a_value = a_value.replace('\\', "/");
+        let b_value = b_value.replace('\\', "/");
         assert_eq!(
             expand_pwsh_env_vars(&format!("${a_name}:${b_name}")),
             format!("{a_value}:{b_value}")
@@ -116,6 +87,8 @@ mod tests {
     #[test]
     fn expands_adjacent_vars() {
         let ((a_name, a_value), (b_name, b_value)) = known_var_two();
+        let a_value = a_value.replace('\\', "/");
+        let b_value = b_value.replace('\\', "/");
         assert_eq!(
             expand_pwsh_env_vars(&format!("${a_name}${b_name}")),
             format!("{a_value}{b_value}")
@@ -131,11 +104,8 @@ mod tests {
     }
 
     #[test]
-    fn keeps_unknown_dollar_env_var_literal() {
-        assert_eq!(
-            expand_pwsh_env_vars("$env:THIS_SHOULD_NOT_EXIST_12345/bin"),
-            "$env:THIS_SHOULD_NOT_EXIST_12345/bin"
-        );
+    fn leaves_dollar_env_prefix_form_unchanged() {
+        assert_eq!(expand_pwsh_env_vars("$env:HOME/bin"), "$env:HOME/bin");
     }
 
     #[test]
@@ -151,6 +121,7 @@ mod tests {
     #[test]
     fn respects_var_boundaries_with_punctuation() {
         let (name, value) = known_var();
+        let value = value.replace('\\', "/");
         assert_eq!(
             expand_pwsh_env_vars(&format!("${name}.suffix")),
             format!("{value}.suffix")
@@ -182,6 +153,7 @@ mod tests {
     #[test]
     fn expands_mixed_literal_var_literal() {
         let (name, value) = known_var();
+        let value = value.replace('\\', "/");
         assert_eq!(
             expand_pwsh_env_vars(&format!("prefix-${name}-suffix")),
             format!("prefix-{value}-suffix")
