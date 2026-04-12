@@ -72,17 +72,20 @@ Invoke-Expression (&shaka pwsh-conflict | Out-String)
 
 - For example, the previous configuration example will create an alias `dc` that runs `docker compose`.
   - `bash`, `fish`, and `zsh`
+
     ```bash
     alias dc='docker compose'
     ```
-  - `pwsh`
+
+  - `pwsh`, `powershell`
 
     ```pwsh
     Remove-Item Alias:dc -ErrorAction Ignore
     function dc { docker compose @args }
     ```
 
-  - `pwsh-conflict`
+  - `pwsh`, `powershell` with builtin aliases included
+
     ```pwsh
     function dc { docker compose @args }
     ```
