@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -n "$(git status --porcelain)" ]; then
+	printf 'Working tree has local changes. Commit or stash before publishing.\n' >&2
+	exit 1
+fi
+
 version="$(awk -F '"' '/^version[[:space:]]*=/{print $2; exit}' Cargo.toml)"
 
 if [ -z "$version" ]; then
