@@ -66,6 +66,22 @@ To make this automatic every time you open a shell, add the same `eval "$(shaka 
 
 ## Installation
 
+Install the latest GitHub release with the platform installer script:
+
+- Linux/macOS:
+
+  ```sh
+  curl -fsSL https://raw.githubusercontent.com/NazmusSayad/shaka/main/install.sh | sh
+  ```
+
+- Windows (PowerShell):
+
+  ```powershell
+  iwr -useb https://raw.githubusercontent.com/NazmusSayad/shaka/main/install.ps1 | iex
+  ```
+
+The installers detect OS/architecture, download the latest release archive, verify checksums, replace previous installed versions, and handle PATH guidance.
+
 Install from the current source checkout:
 
 ```sh
