@@ -71,62 +71,17 @@ trap cleanup EXIT INT TERM
 log "Fetching latest release metadata"
 curl -fsSL -H "User-Agent: shaka-installer" "$api_url" -o "$release_json" || fail "Failed to fetch latest release"
 
-if command -v python3 >/dev/null 2>&1; then
-	py_cmd="python3"
-elif command -v python >/dev/null 2>&1; then
-	py_cmd="python"
-else
-	fail "python3 or python is required to parse release metadata"
-fi
+tag=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$release_json" | head -n 1)
+[ -n "$tag" ] || fail "Release metadata parse failed: missing tag_name"
 
-parsed=$(
-	$py_cmd - "$release_json" "$target" "$checksum_name" <<'PY'
-import json
-import sys
+archive_name="shaka-${tag}-${target}.tar.gz"
 
-release_path, target, checksum_name = sys.argv[1], sys.argv[2], sys.argv[3]
-with open(release_path, "r", encoding="utf-8") as f:
-    data = json.load(f)
+archive_url=$(sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$release_json" | grep -F "/${archive_name}" | head -n 1)
+[ -n "$archive_url" ] || fail "Release metadata parse failed: missing asset:${archive_name}"
 
-tag = data.get("tag_name", "")
-if not tag:
-    print("ERROR:missing tag_name")
-    sys.exit(0)
+checksum_url=$(sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$release_json" | grep -F "/${checksum_name}" | head -n 1)
+[ -n "$checksum_url" ] || fail "Release metadata parse failed: missing checksum"
 
-asset_name = f"shaka-{tag}-{target}.tar.gz"
-asset_url = ""
-checksum_url = ""
-
-for asset in data.get("assets", []):
-    name = asset.get("name", "")
-    url = asset.get("browser_download_url", "")
-    if name == asset_name:
-      asset_url = url
-    if name == checksum_name:
-      checksum_url = url
-
-if not asset_url:
-    print(f"ERROR:missing asset:{asset_name}")
-    sys.exit(0)
-if not checksum_url:
-    print("ERROR:missing checksum")
-    sys.exit(0)
-
-print(tag)
-print(asset_name)
-print(asset_url)
-print(checksum_url)
-PY
-)
-
-case "$parsed" in
-ERROR:*) fail "Release metadata parse failed: ${parsed#ERROR:}" ;;
-esac
-
-tag=$(printf '%s\n' "$parsed" | sed -n '1p')
-archive_name=$(printf '%s\n' "$parsed" | sed -n '2p')
-archive_url=$(printf '%s\n' "$parsed" | sed -n '3p')
-checksum_url=$(printf '%s\n' "$parsed" | sed -n '4p')
 version=${tag#v}
 
 log "Latest release tag: $tag"
