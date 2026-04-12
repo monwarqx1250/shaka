@@ -69,7 +69,7 @@ mod tests {
     }
 
     #[test]
-    fn uses_safe_alias_removal_for_dot_aliases() {
+    fn uses_remove_alias_for_alias_cleanup() {
         let mut entries = IndexMap::new();
         entries.insert("..".to_string(), "cd ..".to_string());
         assert_eq!(
