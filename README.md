@@ -77,7 +77,7 @@ Install the latest GitHub release with the platform installer script:
 - Windows (PowerShell):
 
   ```powershell
-  iwr -useb https://github.com/NazmusSayad/shaka/raw/main/install.ps1 | iex
+  Invoke-WebRequest -UseBasicParsing https://github.com/NazmusSayad/shaka/raw/main/install.ps1 | Invoke-Expression
   ```
 
 The installers detect OS/architecture, download the latest release archive, verify checksums, replace previous installed versions, and handle PATH guidance.
