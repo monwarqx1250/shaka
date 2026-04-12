@@ -1,7 +1,10 @@
 [package]
 name = "shaka"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2024"
+description = "Generate shell aliases and functions from YAML/JSONC config files"
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 indexmap = "2"
