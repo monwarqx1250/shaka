@@ -89,17 +89,31 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          $rawBinTagged = "${env:APP_NAME}-${{ steps.meta.outputs.tag }}-${{ matrix.target }}.exe"
+          $rawBin = "${env:APP_NAME}.exe"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.bin }}" "dist/${{ matrix.bin }}"
+          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.bin }}" "$rawBinTagged"
+          Copy-Item "$rawBinTagged" "$rawBin"
+          Copy-Item "$rawBinTagged" "dist/${{ matrix.bin }}"
           Compress-Archive -Path "dist/${{ matrix.bin }}" -DestinationPath "${env:APP_NAME}-${{ steps.meta.outputs.tag }}-${{ matrix.target }}.zip" -Force
 
-      - name: Upload packaged artifact
+      - name: Upload packaged artifact (unix)
+        if: runner.os != 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: |
             *.tar.gz
+
+      - name: Upload packaged artifact (windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
             *.zip
+            ${{ env.APP_NAME }}-${{ steps.meta.outputs.tag }}-${{ matrix.target }}.exe
+            ${{ env.APP_NAME }}.exe
 
   checksums-and-release:
     name: Checksums and GitHub release
@@ -127,7 +141,11 @@ jobs:
         shell: bash
         run: |
           cd artifacts
-          sha256sum *.tar.gz *.zip > sha256sums.txt
+          for f in *.tar.gz *.zip *.exe; do
+            if [[ -f "$f" && "$f" != "sha256sums.txt" ]]; then
+              sha256sum "$f"
+            fi
+          done > sha256sums.txt
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -137,6 +155,7 @@ jobs:
           files: |
             artifacts/*.tar.gz
             artifacts/*.zip
+            artifacts/*.exe
             artifacts/sha256sums.txt
 
   publish-crates-io:
