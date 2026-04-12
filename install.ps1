@@ -13,6 +13,25 @@ function Fail {
   exit 1
 }
 
+function Get-Sha256 {
+  param([string]$Path)
+
+  if (Get-Command Get-FileHash -ErrorAction SilentlyContinue) {
+    return (Get-FileHash -Path $Path -Algorithm SHA256).Hash.Trim().ToLowerInvariant()
+  }
+
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  $stream = [System.IO.File]::OpenRead($Path)
+  try {
+    $hashBytes = $sha.ComputeHash($stream)
+  } finally {
+    $stream.Dispose()
+    $sha.Dispose()
+  }
+
+  return ([System.BitConverter]::ToString($hashBytes) -replace "-", "").ToLowerInvariant()
+}
+
 $Repo = "NazmusSayad/shaka"
 $ApiUrl = "https://api.github.com/repos/$Repo/releases/latest"
 $InstallDir = Join-Path $env:LOCALAPPDATA "shaka\bin"
@@ -109,7 +128,7 @@ try {
   if (-not $expectedHash) {
     Fail "Checksum entry for $assetName is invalid"
   }
-  $actualHash = (Get-FileHash -Path $archivePath -Algorithm SHA256).Hash.Trim().ToLowerInvariant()
+  $actualHash = Get-Sha256 -Path $archivePath
   if ($expectedHash -ne $actualHash) {
     Fail "Checksum mismatch for $assetName (expected $expectedHash, got $actualHash)"
   }
