@@ -65,3 +65,17 @@ By default `shaka pwsh` omits builtin aliases to avoid conflicts. If you want to
 ```pwsh
 Invoke-Expression (&shaka pwsh-conflict | Out-String)
 ```
+
+## Output
+
+`shaka` outputs shell code that defines aliases and functions based on the configuration files. The output can be evaluated in the shell to set up the aliases and functions.
+
+- For example, the previous configuration example will create an alias `dc` that runs `docker compose`.
+  - `bash`, `fish`, and `zsh`
+    ```bash
+    alias dc='docker compose'
+    ```
+  - `pwsh`
+    ```pwsh
+    function dc { docker compose @args }
+    ```
