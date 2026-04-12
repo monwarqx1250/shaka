@@ -47,7 +47,7 @@ This is project level configuration (based on the current directory). It will ov
   shaka fish | source
   ```
 
-- `pwsh` example:
+- `pwsh` (powershell or pwsh) example:
 
   ```pwsh
   Invoke-Expression (&shaka pwsh | Out-String)
