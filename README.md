@@ -1,8 +1,10 @@
 # shaka
 
+`shaka` generates shell code for aliases and functions from config files.
+
 ## Configuration
 
-`shaka` looks for configuration files in the following order:
+`shaka` loads configuration files in the following order:
 
 ### Global
 
@@ -15,7 +17,7 @@ This is user level configuration.
 
 ### Project
 
-This is project level configuration (based on the current directory). It will override global configuration.
+This is project-level configuration (based on the current directory). It has higher priority than global configuration.
 
 - ./.shaka.yaml
 - ./.shaka.json
@@ -24,7 +26,7 @@ This is project level configuration (based on the current directory). It will ov
 
 - bash
 - fish
-- pwsh
+- pwsh (PowerShell)
 - zsh
 
 ## Example
@@ -47,7 +49,7 @@ This is project level configuration (based on the current directory). It will ov
   shaka fish | source
   ```
 
-- `pwsh` (powershell or pwsh) example:
+- `pwsh` (PowerShell) example:
 
   ```pwsh
   Invoke-Expression (&shaka pwsh | Out-String)
@@ -58,9 +60,9 @@ This is project level configuration (based on the current directory). It will ov
   eval "$(shaka zsh)"
   ```
 
-## Powershell Alias Conflict
+## PowerShell Alias Conflict
 
-By default `shaka pwsh` omits builtin aliases to avoid conflicts. If you want to include them, use:
+By default, `shaka pwsh` omits built-in aliases to avoid conflicts. If you want to include them, use:
 
 ```pwsh
 Invoke-Expression (&shaka pwsh-conflict | Out-String)
@@ -68,7 +70,7 @@ Invoke-Expression (&shaka pwsh-conflict | Out-String)
 
 ## Output
 
-`shaka` outputs shell code that defines aliases and functions based on the configuration files. The output can be evaluated in the shell to set up the aliases and functions.
+`shaka` outputs shell code that defines aliases and functions based on the configuration files. Evaluate the output in your shell to set them up.
 
 - For example, the previous configuration example will create an alias `dc` that runs `docker compose`.
   - `bash`, `fish`, and `zsh`
@@ -77,14 +79,14 @@ Invoke-Expression (&shaka pwsh-conflict | Out-String)
     alias dc='docker compose'
     ```
 
-  - `pwsh`, `powershell`
+  - `pwsh` (PowerShell)
 
     ```pwsh
     Remove-Item Alias:dc -ErrorAction Ignore
     function dc { docker compose @args }
     ```
 
-  - `pwsh`, `powershell` with builtin aliases included
+  - `pwsh` (PowerShell) with built-in aliases included
 
     ```pwsh
     function dc { docker compose @args }
