@@ -19,3 +19,41 @@ This is project level configuration (based on the current directory). It will ov
 
 - ./.shaka.yaml
 - ./.shaka.json
+
+## Supported Shells
+
+- bash
+- fish
+- pwsh
+- zsh
+
+## Example
+
+- `~/.config/shaka.yaml` example:
+
+  ```yaml
+  dc: docker compose
+  ```
+
+- `bash` example:
+
+  ```bash
+  eval "$(shaka bash)"
+  ```
+
+- `fish` example:
+
+  ```fish
+  shaka fish | source
+  ```
+
+- `pwsh` example:
+
+  ```pwsh
+  Invoke-Expression (&shaka pwsh | Out-String)
+  ```
+
+- `zsh` example:
+  ```zsh
+  eval "$(shaka zsh)"
+  ```
