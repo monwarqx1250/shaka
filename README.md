@@ -63,5 +63,5 @@ This is project level configuration (based on the current directory). It will ov
 By default `shaka pwsh` omits builtin aliases to avoid conflicts. If you want to include them, use:
 
 ```pwsh
-Invoke-Expression (&shaka pwsh --keep | Out-String)
+Invoke-Expression (&shaka pwsh-conflict | Out-String)
 ```
