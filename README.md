@@ -76,6 +76,13 @@ Invoke-Expression (&shaka pwsh-conflict | Out-String)
     alias dc='docker compose'
     ```
   - `pwsh`
+
+    ```pwsh
+    Remove-Item Alias:dc -ErrorAction Ignore
+    function dc { docker compose @args }
+    ```
+
+  - `pwsh-conflict`
     ```pwsh
     function dc { docker compose @args }
     ```
