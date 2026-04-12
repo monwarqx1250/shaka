@@ -34,6 +34,11 @@ jobs:
             target: x86_64-unknown-linux-gnu
             archive: tar.gz
             bin: shaka
+          - name: linux-aarch64
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            archive: tar.gz
+            bin: shaka
           - name: macos-x86_64
             os: macos-latest
             target: x86_64-apple-darwin
@@ -47,6 +52,11 @@ jobs:
           - name: windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
+            archive: zip
+            bin: shaka.exe
+          - name: windows-aarch64
+            os: windows-latest
+            target: aarch64-pc-windows-msvc
             archive: zip
             bin: shaka.exe
 
@@ -89,31 +99,17 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $rawBinTagged = "${env:APP_NAME}-${{ steps.meta.outputs.tag }}-${{ matrix.target }}.exe"
-          $rawBin = "${env:APP_NAME}.exe"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.bin }}" "$rawBinTagged"
-          Copy-Item "$rawBinTagged" "$rawBin"
-          Copy-Item "$rawBinTagged" "dist/${{ matrix.bin }}"
+          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.bin }}" "dist/${{ matrix.bin }}"
           Compress-Archive -Path "dist/${{ matrix.bin }}" -DestinationPath "${env:APP_NAME}-${{ steps.meta.outputs.tag }}-${{ matrix.target }}.zip" -Force
 
-      - name: Upload packaged artifact (unix)
-        if: runner.os != 'Windows'
+      - name: Upload packaged artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: |
             *.tar.gz
-
-      - name: Upload packaged artifact (windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.name }}
-          path: |
             *.zip
-            ${{ env.APP_NAME }}-${{ steps.meta.outputs.tag }}-${{ matrix.target }}.exe
-            ${{ env.APP_NAME }}.exe
 
   checksums-and-release:
     name: Checksums and GitHub release
@@ -141,7 +137,7 @@ jobs:
         shell: bash
         run: |
           cd artifacts
-          for f in *.tar.gz *.zip *.exe; do
+          for f in *.tar.gz *.zip; do
             if [[ -f "$f" && "$f" != "sha256sums.txt" ]]; then
               sha256sum "$f"
             fi
@@ -155,7 +151,6 @@ jobs:
           files: |
             artifacts/*.tar.gz
             artifacts/*.zip
-            artifacts/*.exe
             artifacts/sha256sums.txt
 
   publish-crates-io:
