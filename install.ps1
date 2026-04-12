@@ -1,6 +1,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+if (-not (Get-Command % -ErrorAction SilentlyContinue)) {
+  Set-Alias -Name % -Value ForEach-Object -Scope Script
+}
 
 function Write-Step {
   param([string]$Message)
