@@ -8,13 +8,14 @@
 
 ## Why you should choose shaka?
 
-Managing shell shortcuts becomes increasingly difficult as environments, shells, and projects multiply.
+Managing shell shortcuts across multiple shells (bash, zsh, fish, PowerShell) becomes fragmented and hard to maintain. Aliases defined in `.zshrc` don't apply to bash, project-specific commands scatter across different files, and keeping them in sync is tedious.
 
-What begins as a few aliases in a single shell profile often evolves into parallel definitions across `.zshrc`, `.bashrc`, `config.fish`, and PowerShell profiles. Once project-specific commands are added, the setup becomes fragmented, repetitive, and harder to maintain consistently.
+`shaka` solves this by letting you define all your shortcuts once in a single YAML or JSONC file and generate the appropriate shell-specific output. Benefits include:
 
-In practice, this means the same shortcut must be maintained in multiple shell syntaxes, personal and project-level commands become scattered across different files, and changes made in one environment do not automatically carry over to others. Over time, even a small set of useful aliases becomes harder to reason about, harder to migrate to a new machine, and harder to keep consistent across daily workflows. PowerShell adds another layer of complexity because its behavior and compatibility model differ from POSIX-style shells.
-
-`shaka` addresses this by letting you define shortcuts once in a single YAML or JSONC file and generate the appropriate shell-specific output when needed. The result is a simpler and more maintainable workflow: you keep a single source of truth for your commands, generate output tailored to each shell, layer project-specific overrides on top of global defaults, reduce manual profile editing, and benefit from PowerShell-specific handling such as alias conflict management and environment variable expansion.
+- Single source of truth for all commands
+- Automatic generation for bash, zsh, fish, and PowerShell
+- Project-level overrides for repository-specific commands
+- Built-in PowerShell compatibility (no manual alias conflict resolution)
 
 ## Quick Start
 
@@ -170,7 +171,7 @@ JSONC form:
 {
   // comments are allowed
   "dc": "docker compose",
-  "gs": "git status"
+  "gs": "git status",
 }
 ```
 
