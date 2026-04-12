@@ -1,5 +1,6 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function Write-Step {
   param([string]$Message)
@@ -114,7 +115,11 @@ try {
   }
 
   Write-Step "Extracting archive"
-  Expand-Archive -Path $archivePath -DestinationPath $extractDir -Force
+  if (Test-Path $extractDir) {
+    Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
+  [System.IO.Compression.ZipFile]::ExtractToDirectory($archivePath, $extractDir)
 
   $newBinary = Get-ChildItem -Path $extractDir -Recurse -File | Where-Object { $_.Name -eq "shaka.exe" } | Select-Object -First 1
   if (-not $newBinary) {
