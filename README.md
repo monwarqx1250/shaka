@@ -12,23 +12,9 @@ Managing shell shortcuts becomes increasingly difficult as environments, shells,
 
 What begins as a few aliases in a single shell profile often evolves into parallel definitions across `.zshrc`, `.bashrc`, `config.fish`, and PowerShell profiles. Once project-specific commands are added, the setup becomes fragmented, repetitive, and harder to maintain consistently.
 
-This typically leads to a few recurring problems:
+In practice, this means the same shortcut must be maintained in multiple shell syntaxes, personal and project-level commands become scattered across different files, and changes made in one environment do not automatically carry over to others. Over time, even a small set of useful aliases becomes harder to reason about, harder to migrate to a new machine, and harder to keep consistent across daily workflows. PowerShell adds another layer of complexity because its behavior and compatibility model differ from POSIX-style shells.
 
-- the same shortcut must be maintained in different shell syntaxes
-- personal and project-level commands become distributed across multiple files
-- changes made in one shell environment do not automatically carry over to others
-- onboarding a new machine requires rebuilding the same setup manually
-- PowerShell introduces different behavior and compatibility concerns from POSIX-style shells
-
-`shaka` addresses this by allowing you to define shortcuts once in a single YAML or JSONC file and generate the appropriate shell-specific output when needed.
-
-Key benefits:
-
-- one source of truth for command shortcuts
-- shell-specific output from the same config
-- project-level overrides on top of global defaults
-- less manual profile editing
-- PowerShell-specific handling for alias conflicts and env var expansion
+`shaka` addresses this by letting you define shortcuts once in a single YAML or JSONC file and generate the appropriate shell-specific output when needed. The result is a simpler and more maintainable workflow: you keep a single source of truth for your commands, generate output tailored to each shell, layer project-specific overrides on top of global defaults, reduce manual profile editing, and benefit from PowerShell-specific handling such as alias conflict management and environment variable expansion.
 
 ## Quick Start
 
@@ -190,7 +176,9 @@ JSONC form:
 
 ## Precedence
 
-Global config is useful for personal defaults:
+`shaka` loads global configuration first and then applies project-level configuration on top of it. In practice, this means your personal defaults can live in your home directory, while a repository can override or add commands locally without changing your global setup.
+
+For example, you might keep this in your global config:
 
 ```yaml
 # ~/.config/shaka.yaml
@@ -198,7 +186,7 @@ dc: docker compose
 ls: eza
 ```
 
-Project config can override or extend it:
+Then, inside a specific project, you might define:
 
 ```yaml
 # ./.shaka.yaml
@@ -206,7 +194,7 @@ dc: docker compose -f dev.yml
 test: cargo test
 ```
 
-The merged result will behave as if you defined:
+When `shaka` merges these files, the project value for `dc` replaces the global one, while the other commands remain available. The final result behaves as if you had written:
 
 ```yaml
 ls: eza
@@ -257,34 +245,26 @@ function dc { docker compose @args }
 
 ## PowerShell Environment Variable Expansion
 
-In `pwsh` output mode, `shaka` expands environment variables in command values before rendering functions.
+In `pwsh` output mode, `shaka` expands environment variables inside command values before rendering functions. This is useful when your shortcuts depend on machine-specific locations such as your home directory or application install paths.
 
 - Supported forms: `$NAME` and `$env:NAME`
 - Missing variables are left unchanged
 - Expansion is only applied for `pwsh`; `bash`, `fish`, and `zsh` outputs are unchanged
 
-Example input:
+Example use case:
+
+You want a shortcut that opens your projects directory in your editor without hardcoding your user-specific home path.
+
+Example config:
 
 ```yaml
-ocd: $HOME/scoop/apps/opencode-desktop/current/OpenCode
+n: $HOME/.local/bin/node
 ```
 
-Example output:
+Generated PowerShell function:
 
 ```sh
-function ocd { C:\Users\Sayad/scoop/apps/opencode-desktop/current/OpenCode @args }
+function n { C:/User/.local/bin/node @args }
 ```
 
-## Contributing
-
-Issues and pull requests are welcome.
-
-For local verification:
-
-```sh
-cargo test
-```
-
-## License
-
-MIT
+This keeps the config portable while still producing a concrete command at render time. It is helpful when the command should stay the same logically, but the underlying absolute path differs from one machine to another.
